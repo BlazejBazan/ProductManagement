@@ -55,8 +55,7 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{" +
-                "id=" + id +
+        return "{id=" + id +
                 ", name='" + name + '\'' +
                 ", price=" + price +
                 ", rating=" + rating.getStars() +
