@@ -7,6 +7,8 @@ package labs.pm.data;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import static labs.pm.data.Rating.*;
+
 /**
  * {@code Product} class represents properties and behaviours of
  * product objects in the Product Management System.
@@ -31,6 +33,41 @@ public class Product {
     private int id;
     private String name;
     private BigDecimal price;
+    private Rating rating;
+
+    //static {id = ++id;}
+
+    public Product(int id, String name, BigDecimal price, Rating rating) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.rating = rating;
+    }
+
+    public Product(int id, String name, BigDecimal price) {
+        this(id, name, price, NOT_RATED);
+    }
+
+    public Product() {
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", rating=" + rating.getStars() +
+                '}';
+    }
+
+    public Rating getRating() {
+        return rating;
+    }
+
+    public void setRating(Rating rating) {
+        this.rating = rating;
+    }
 
     public int getId() {
         return id;

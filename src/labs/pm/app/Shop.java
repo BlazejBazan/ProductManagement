@@ -5,6 +5,7 @@
 package labs.pm.app;
 
 import labs.pm.data.Product;
+import labs.pm.data.Rating;
 
 import java.math.BigDecimal;
 
@@ -23,10 +24,12 @@ public class Shop {
      */
     public static void main(String[] args) {
         //TODO Application logic
-        Product p1 = new Product();
-        p1.setId(1);
-        p1.setName("Tea");
-        p1.setPrice(BigDecimal.valueOf(1.99));
-        System.out.println(p1.getId() + " " + p1.getName() + " " + p1.getPrice() + " " + p1.getDiscount());
+        Product p1 = new Product(1, "Tea", BigDecimal.valueOf(1.99));
+        Product p2 = new Product(2, "Coffee", BigDecimal.valueOf(11.99), Rating.FIVE_STAR);
+        Product p3 = new Product(3, "Cookie", BigDecimal.valueOf(3.99), Rating.FOUR_STAR);
+
+        System.out.println(p1.toString());
+        System.out.println(p2.toString());
+        System.out.println(p3.toString());
     }
 }
