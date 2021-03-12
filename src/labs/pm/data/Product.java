@@ -6,6 +6,8 @@ package labs.pm.data;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.Objects;
 
 import static labs.pm.data.Rating.*;
 
@@ -22,7 +24,7 @@ import static labs.pm.data.Rating.*;
  * @version 4.0
  */
 
-public class Product {
+public abstract class Product {
 
     /**
      * A constant that defines a {@link java.math.BigDecimal BigDecimal} value
@@ -49,6 +51,19 @@ public class Product {
         this(id, name, price, NOT_RATED);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Product)) return false;
+        Product product = (Product) o;
+        return id == product.id && Objects.equals(name, product.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
+
     public Product() {
         this(0, "no name", BigDecimal.ZERO);
     }
@@ -58,17 +73,17 @@ public class Product {
         return "{id=" + id +
                 ", name='" + name + '\'' +
                 ", price=" + price +
+                ", discount=" + getDiscount() +
                 ", rating=" + rating.getStars() +
-                '}';
+                ", bestBefore=" + getBestBefore() +
+                "}";
     }
 
     public Rating getRating() {
         return rating;
     }
 
-    public Product ApplyRating(Rating newRating) {
-        return new Product(id, name, price, newRating);
-    }
+    public abstract Product ApplyRating(Rating newRating);
 
     public int getId() {
         return id;
@@ -80,6 +95,15 @@ public class Product {
 
     public BigDecimal getPrice() {
         return price;
+    }
+
+    /**
+     * Get the value of the best before date for the product.
+     *
+     * @return the value of bestBefore
+     */
+    public LocalDate getBestBefore() {
+        return LocalDate.now();
     }
 
     /**
