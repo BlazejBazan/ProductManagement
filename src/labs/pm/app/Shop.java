@@ -4,10 +4,7 @@
 
 package labs.pm.app;
 
-import labs.pm.data.Drink;
-import labs.pm.data.Food;
-import labs.pm.data.Product;
-import labs.pm.data.Rating;
+import labs.pm.data.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,18 +24,19 @@ public class Shop {
      */
     public static void main(String[] args) {
         //TODO Application logic
-        Product p1 = new Drink(1, "Tea", BigDecimal.valueOf(1.99), Rating.ONE_STAR);
-        Product p2 = new Drink(2, "Coffee", BigDecimal.valueOf(11.99), Rating.FIVE_STAR);
-        Product p3 = new Food(3, "Cookie", BigDecimal.valueOf(2.99), Rating.FOUR_STAR, LocalDate.now());
-        Product p4 = new Food(4, "Cake", BigDecimal.valueOf(8.99), Rating.THREE_STAR, LocalDate.now().plusDays(3));
-        Product p5 = new Drink(5, "Chocolate", BigDecimal.valueOf(3.99), Rating.TWO_STAR);
-        Product p6 = new Food(5, "Chocolate", BigDecimal.valueOf(3.99), Rating.FIVE_STAR, LocalDate.now().plusDays(5));
+        ProductManager pm = new ProductManager();
+        Product p1 = pm.createProduct(1, "Tea", BigDecimal.valueOf(1.99), Rating.ONE_STAR);
+        Product p2 = pm.createProduct(2, "Coffee", BigDecimal.valueOf(11.99), Rating.FIVE_STAR);
+        Product p3 = pm.createProduct(3, "Cookie", BigDecimal.valueOf(2.99), Rating.FOUR_STAR, LocalDate.now());
+        Product p4 = pm.createProduct(4, "Cake", BigDecimal.valueOf(8.99), Rating.THREE_STAR, LocalDate.now().plusDays(3));
+        Product p5 = pm.createProduct(5, "Chocolate", BigDecimal.valueOf(3.99), Rating.TWO_STAR);
+        Product p6 = pm.createProduct(5, "Chocolate", BigDecimal.valueOf(3.99), Rating.FIVE_STAR, LocalDate.now().plusDays(5));
 
         System.out.println(p1);
         System.out.println(p2.toString());
         System.out.println(p3);
         System.out.println(p4);
-        p4 = p4.ApplyRating(Rating.TWO_STAR);
+        p4 = p4.applyRating(Rating.TWO_STAR);
         System.out.println(p4);
         System.out.println(p5);
         System.out.println(p6);

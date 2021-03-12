@@ -33,21 +33,21 @@ public abstract class Product {
      * Discount rate is 10%
      */
     public static final BigDecimal DISCOUNT_RATE = BigDecimal.valueOf(0.1);
-    private int id;
-    private String name;
-    private BigDecimal price;
-    private Rating rating;
+    private final int id;
+    private final String name;
+    private final BigDecimal price;
+    private final Rating rating;
 
     //static {id = ++id;}
 
-    public Product(int id, String name, BigDecimal price, Rating rating) {
+    Product(int id, String name, BigDecimal price, Rating rating) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.rating = rating;
     }
 
-    public Product(int id, String name, BigDecimal price) {
+    Product(int id, String name, BigDecimal price) {
         this(id, name, price, NOT_RATED);
     }
 
@@ -62,10 +62,6 @@ public abstract class Product {
     @Override
     public int hashCode() {
         return Objects.hash(id, name);
-    }
-
-    public Product() {
-        this(0, "no name", BigDecimal.ZERO);
     }
 
     @Override
@@ -83,7 +79,7 @@ public abstract class Product {
         return rating;
     }
 
-    public abstract Product ApplyRating(Rating newRating);
+    public abstract Product applyRating(Rating newRating);
 
     public int getId() {
         return id;
