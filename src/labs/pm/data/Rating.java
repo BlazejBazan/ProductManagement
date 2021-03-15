@@ -6,7 +6,7 @@ package labs.pm.data;
 
 /**
  * {@code Rating} is an {@link java.lang.Enum Enum} instance represents
- * rating of product using five-point scale.
+ * rating using five-point scale.
  *
  * @author Blazej Bazan
  * @version 5.0

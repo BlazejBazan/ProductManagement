@@ -13,6 +13,11 @@ public final class Drink extends Product {
     }
 
     @Override
+    public Rating getRating() {
+        return super.getRating();
+    }
+
+    @Override
     public Product applyRating(Rating newRating) {
         return new Drink(getId(), getName(), getPrice(), newRating);
     }

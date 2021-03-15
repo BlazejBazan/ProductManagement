@@ -25,6 +25,11 @@ public final class Food extends Product {
         return new Food(getId(), getName(), getPrice(), newRating, getBestBefore());
     }
 
+    @Override
+    public Rating getRating() {
+        return super.getRating();
+    }
+
     /**
      * Get the value of the best before date for the product.
      *

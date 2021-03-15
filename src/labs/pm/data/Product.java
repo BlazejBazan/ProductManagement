@@ -24,7 +24,7 @@ import static labs.pm.data.Rating.*;
  * @version 4.0
  */
 
-public abstract class Product {
+public abstract class Product implements Rateable<Product> {
 
     /**
      * A constant that defines a {@link java.math.BigDecimal BigDecimal} value
@@ -75,11 +75,14 @@ public abstract class Product {
                 "}";
     }
 
+    /**
+     * @return value of {@link Rating rating} for instance
+     * of {@link Product product}.
+     */
+    @Override
     public Rating getRating() {
         return rating;
     }
-
-    public abstract Product applyRating(Rating newRating);
 
     public int getId() {
         return id;
@@ -104,7 +107,7 @@ public abstract class Product {
 
     /**
      * Calculate discount based on a product price and
-     * {@link DISCOUNT_RATE discount rate}
+     * {@link DISCOUNT_RATE discount rate}.
      *
      * @return a {@link java.math.BigDecimal BigDecimal}
      * value of the discount
