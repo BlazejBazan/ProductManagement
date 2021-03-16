@@ -27,7 +27,12 @@ public class Shop {
         //TODO Application logic
         ProductManager pm = new ProductManager(Locale.UK);
         Product p1 = pm.createProduct(1, "Tea", BigDecimal.valueOf(1.99), Rating.NOT_RATED);
+        pm.printProductReport();
         p1 = pm.reviewProduct(p1, Rating.FOUR_STAR, "Nice hot cup of tea!");
+        p1 = pm.reviewProduct(p1, Rating.FIVE_STAR, "I love this tea!");
+        p1 = pm.reviewProduct(p1, Rating.ONE_STAR, "Awful");
+        p1 = pm.reviewProduct(p1, Rating.ONE_STAR, "Taste like socks");
+        p1 = pm.reviewProduct(p1, Rating.FOUR_STAR, "Not bad");
         pm.printProductReport();
 //        Product p2 = pm.createProduct(2, "Coffee", BigDecimal.valueOf(11.99), Rating.FIVE_STAR);
 //        Product p3 = pm.createProduct(3, "Cookie", BigDecimal.valueOf(2.99), Rating.FOUR_STAR, LocalDate.now());
