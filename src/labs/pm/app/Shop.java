@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.function.Predicate;
 
 /**
  * {@code Shop} class represents an application that manages Products
@@ -34,7 +35,7 @@ public class Shop {
         pm.reviewProduct(1, Rating.ONE_STAR, "Awful");
         pm.reviewProduct(1, Rating.ONE_STAR, "Taste like socks");
         pm.reviewProduct(1, Rating.FOUR_STAR, "Not bad");
-//        pm.printProductReport(1);
+        pm.printProductReport(1);
         pm.changeLocale("pl-PL");
         pm.createProduct(2, "Coffee", BigDecimal.valueOf(11.99), Rating.FIVE_STAR);
 //        pm.printProductReport(2);
@@ -50,6 +51,10 @@ public class Shop {
         Comparator<Product> priceSorter = Comparator.comparing(Product::getPrice);
 //        Comparator<Product> priceSorter = (p1, p2) -> p1.getPrice().compareTo(p2.getPrice());
         Comparator<Product> ratingSorter = (p1, p2) -> p2.getRating().ordinal() - p1.getRating().ordinal();
-        pm.printProducts(ratingSorter.thenComparing(priceSorter));
+
+        Predicate<Product> priceLessThanFiveFilter = product -> product.getPrice().floatValue() < 5;
+
+        pm.printProducts(priceLessThanFiveFilter, ratingSorter.thenComparing(priceSorter));
+        pm.printProducts(priceLessThanFiveFilter, priceSorter);
     }
 }
