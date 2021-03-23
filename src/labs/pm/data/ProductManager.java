@@ -14,6 +14,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
  * @version 6.0
  */
 public class ProductManager {
+    private static final Logger LOGGER = Logger.getLogger(ProductManagerException.class.getName());
     private Map<Product, List<Review>> products = new HashMap<>();
     private static Map<String, ResourceFormatter> formatters =
             Map.of("en-GB", new ResourceFormatter(Locale.UK),
@@ -49,16 +52,19 @@ public class ProductManager {
         formatter = formatters.getOrDefault(languageTag, formatters.get("en-GB"));
     }
 
-    public Product findProduct(int id) {
+    public Product findProduct(int id) throws ProductManagerException {
         return products.keySet()
                 .stream()
-                .filter(product -> product.getId() == id)
-                .findFirst()
-                .orElseGet(() -> null);
+                .filter(product -> product.getId() == id).findFirst()
+                .orElseThrow(() -> new ProductManagerException("Product " + id + " not found"));
     }
 
     public void printProductReport(int id) {
-        printProductReport(findProduct(id));
+        try {
+            printProductReport(findProduct(id));
+        } catch (ProductManagerException e) {
+            LOGGER.log(Level.INFO, e.getMessage());
+        }
     }
 
     public void printProductReport(Product product) {
@@ -111,7 +117,12 @@ public class ProductManager {
     }
 
     public Product reviewProduct(int id, Rating rating, String comments) {
-        return reviewProduct(findProduct(id), rating, comments);
+        try {
+            return reviewProduct(findProduct(id), rating, comments);
+        } catch (ProductManagerException e) {
+            LOGGER.log(Level.INFO, e.getMessage());
+        }
+        return null;
     }
 
     public Product reviewProduct(Product product, Rating rating, String comments) {
