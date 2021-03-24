@@ -4,9 +4,15 @@
 
 package labs.pm.data;
 
-import org.jetbrains.annotations.NotNull;
-
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -27,18 +33,21 @@ import java.util.stream.Collectors;
  */
 public class ProductManager {
     private static final Logger LOGGER = Logger.getLogger(ProductManagerException.class.getName());
-    private Map<Product, List<Review>> products = new HashMap<>();
-    private static Map<String, ResourceFormatter> formatters =
+    private static final Map<String, ResourceFormatter> formatters =
             Map.of("en-GB", new ResourceFormatter(Locale.UK),
                     "en-US", new ResourceFormatter(Locale.US),
                     "fr-FR", new ResourceFormatter(Locale.FRANCE),
                     "ru-RU", new ResourceFormatter(new Locale("ru", "RU")),
                     "zh-CN", new ResourceFormatter(Locale.CHINA),
                     "pl-PL", new ResourceFormatter(new Locale("pl", "PL")));
+    private final Map<Product, List<Review>> products = new HashMap<>();
     private ResourceFormatter formatter;
-    private ResourceBundle config = ResourceBundle.getBundle("labs.pm.data.config");
-    private MessageFormat productFormat = new MessageFormat(config.getString("product.data.format"));
-    private MessageFormat reviewFormat = new MessageFormat(config.getString("review.data.format"));
+    private final ResourceBundle config = ResourceBundle.getBundle("labs.pm.data.config");
+    private final MessageFormat productFormat = new MessageFormat(config.getString("product.data.format"));
+    private final MessageFormat reviewFormat = new MessageFormat(config.getString("review.data.format"));
+    private final Path reportsFolder = Path.of(config.getString("reports.folder"));
+    private final Path tempFolder = Path.of(config.getString("temp.folder"));
+    private final Path dataFolder = Path.of(config.getString("data.folder"));
 
     public ProductManager(Locale locale) {
         this(locale.toLanguageTag());
@@ -68,28 +77,30 @@ public class ProductManager {
             printProductReport(findProduct(id));
         } catch (ProductManagerException e) {
             LOGGER.log(Level.INFO, e.getMessage());
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error printing product report " + e.getMessage(), e);
         }
     }
 
-    public void printProductReport(Product product) {
+    public void printProductReport(Product product) throws IOException {
         List<Review> reviews = products.get(product);
-        StringBuilder txt = new StringBuilder();
+        Path productFile = reportsFolder.resolve(MessageFormat.format(
+                config.getString("report.file"), product.getId()));
 
-        txt.append(formatter.formatProduct(product));
-        txt.append('\n');
-        Collections.sort(reviews);
+        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(Files.newOutputStream(
+                productFile, StandardOpenOption.CREATE), StandardCharsets.UTF_8))) {
+            out.append(formatter.formatProduct(product)).append(System.lineSeparator());
+            Collections.sort(reviews);
 
-        if (reviews.isEmpty()) {
-            txt.append(formatter.getText("no.reviews"));
-            txt.append('\n');
-        } else {
-            txt.append(reviews.stream()
-                    .map(review -> formatter.formatReview(review) + '\n')
-                    .collect(Collectors.joining())
-            );
+            if (reviews.isEmpty()) {
+                out.append(formatter.getText("no.reviews")).append(System.lineSeparator());
+            } else {
+                out.append(reviews.stream()
+                        .map(review -> formatter.formatReview(review) + System.lineSeparator())
+                        .collect(Collectors.joining())
+                );
+            }
         }
-
-        System.out.println(txt);
     }
 
     public void printProducts(Predicate<Product> filter, Comparator<Product> sorter) {
@@ -196,10 +207,10 @@ public class ProductManager {
     }
 
     private static class ResourceFormatter {
-        private Locale locale;
-        private ResourceBundle resources;
-        private DateTimeFormatter dateFormat;
-        private NumberFormat moneyFormat;
+        private final Locale locale;
+        private final ResourceBundle resources;
+        private final DateTimeFormatter dateFormat;
+        private final NumberFormat moneyFormat;
 
         private ResourceFormatter(Locale locale) {
             this.locale = locale;
