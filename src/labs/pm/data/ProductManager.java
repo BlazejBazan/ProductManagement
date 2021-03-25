@@ -4,9 +4,7 @@
 
 package labs.pm.data;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -16,6 +14,7 @@ import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -247,6 +246,36 @@ public class ProductManager {
                     .collect(Collectors.toMap(product -> product, this::loadReviews));
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error loading data " + e.getMessage(), e);
+        }
+    }
+
+    private void dumpData() {
+        try {
+            if (Files.notExists(tempFolder)) {
+                Files.createDirectory(tempFolder);
+            }
+            Path tempFile = tempFolder.resolve(MessageFormat.format(
+                    config.getString("temp.file"), Instant.now().toString().replace(':', '-')));
+            try (ObjectOutputStream out = new ObjectOutputStream(Files.newOutputStream(tempFile, StandardOpenOption.CREATE))) {
+                out.writeObject(products);
+                products = new HashMap<>();
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error dumping data " + e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void restoreData() {
+        try {
+            Path tempFile = Files.list(tempFolder)
+                    .filter(path -> path.getFileName().toString().endsWith("tmp"))
+                    .findFirst().orElseThrow();
+            try (ObjectInputStream in = new ObjectInputStream(Files.newInputStream(tempFile, StandardOpenOption.DELETE_ON_CLOSE))) {
+                products = (HashMap) in.readObject();
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error restoring data " + e.getMessage(), e);
         }
     }
 
