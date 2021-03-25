@@ -29,12 +29,12 @@ public class Shop {
         //TODO Application logic
         ProductManager pm = new ProductManager("en-GB");
 //        pm.createProduct(1, "Tea", BigDecimal.valueOf(1.99), Rating.NOT_RATED);
-        pm.parseProduct("D, 1, Tea, 1.99, 0, 2021-03-56");
-        pm.parseReview("1, 2, Nice hot cup of tea");
-        pm.parseReview("1, 3, Hot tea");
-        pm.parseReview("1, 3, Nice tea");
-        pm.parseReview("1, 5, Nice");
-        pm.parseReview("1, 1, Bad tea");
+//        pm.parseProduct("D, 1, Tea, 1.99, 0, 2021-03-56");
+//        pm.parseReview("1, 2, Nice hot cup of tea");
+//        pm.parseReview("1, 3, Hot tea");
+//        pm.parseReview("1, 3, Nice tea");
+//        pm.parseReview("1, 5, Nice");
+//        pm.parseReview("1, 1, Bad tea");
         pm.printProductReport(1);
 
 //        pm.reviewProduct(1, Rating.FOUR_STAR, "Nice hot cup of tea!");
@@ -50,6 +50,10 @@ public class Shop {
 //        pm.createProduct(5, "Chocolate", BigDecimal.valueOf(3.99), Rating.TWO_STAR);
 //        pm.createProduct(5, "Chocolate", BigDecimal.valueOf(3.99), Rating.FIVE_STAR, LocalDate.now().plusDays(5));
 //
+//        pm.printProductReport(2);
+//        pm.printProductReport(3);
+//        pm.printProductReport(4);
+//        pm.printProductReport(5);
 //
 //        Comparator<Product> priceSorter = Comparator.comparing(Product::getPrice);
 //        Comparator<Product> priceSorter = (p1, p2) -> p1.getPrice().compareTo(p2.getPrice());

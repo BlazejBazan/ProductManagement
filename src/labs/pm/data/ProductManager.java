@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -40,7 +39,7 @@ public class ProductManager {
                     "ru-RU", new ResourceFormatter(new Locale("ru", "RU")),
                     "zh-CN", new ResourceFormatter(Locale.CHINA),
                     "pl-PL", new ResourceFormatter(new Locale("pl", "PL")));
-    private final Map<Product, List<Review>> products = new HashMap<>();
+    private Map<Product, List<Review>> products = new HashMap<>();
     private ResourceFormatter formatter;
     private final ResourceBundle config = ResourceBundle.getBundle("labs.pm.data.config");
     private final MessageFormat productFormat = new MessageFormat(config.getString("product.data.format"));
@@ -49,12 +48,15 @@ public class ProductManager {
     private final Path tempFolder = Path.of(config.getString("temp.folder"));
     private final Path dataFolder = Path.of(config.getString("data.folder"));
 
+//=============================================================================================================
+
     public ProductManager(Locale locale) {
         this(locale.toLanguageTag());
     }
 
     public ProductManager(String languageTag) {
         changeLocale(languageTag);
+        loadAllData();
     }
 
     public static Set<String> getSupportedLocales() {
@@ -113,6 +115,16 @@ public class ProductManager {
         System.out.println(txt);
     }
 
+    private Product loadProduct(Path file) {
+        Product product = null;
+        try {
+            product = parseProduct(Files.lines(dataFolder.resolve(file), StandardCharsets.UTF_8).findFirst().orElseThrow());
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error loading product " + e.getMessage());
+        }
+        return product;
+    }
+
     /**
      * @return new instance of {@link Food Food} class.
      */
@@ -160,6 +172,24 @@ public class ProductManager {
         return product;
     }
 
+    private List<Review> loadReviews(Product product) {
+        List<Review> reviews = null;
+        Path file = dataFolder.resolve(MessageFormat.format(config.getString("reviews.data.file"), product.getId()));
+        if (Files.notExists(file)) {
+            reviews = new ArrayList<>();
+        } else {
+            try {
+                reviews = Files.lines(file, StandardCharsets.UTF_8)
+                        .map(this::parseReview)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+            } catch (IOException e) {
+                LOGGER.log(Level.WARNING, "Error loading reviews " + e.getMessage());
+            }
+        }
+        return reviews;
+    }
+
     public Map<String, String> getDiscounts() {
         return products.keySet()
                 .stream()
@@ -174,18 +204,19 @@ public class ProductManager {
                 );
     }
 
-    public void parseReview(String text) {
+    private Review parseReview(String text) {
+        Review review = null;
         try {
             Object[] values = reviewFormat.parse(text);
-            reviewProduct(Integer.parseInt((String) values[0])
-                    , Rateable.convert(Integer.parseInt((String) values[1]))
-                    , (String) values[2]);
+            review = new Review(Rateable.convert(Integer.parseInt((String) values[0])), (String) values[1]);
         } catch (ParseException | NumberFormatException e) {
             LOGGER.log(Level.WARNING, "Error parsing review " + text);
         }
+        return review;
     }
 
-    public void parseProduct(String text) {
+    private Product parseProduct(String text) {
+        Product product = null;
         try {
             Object[] values = productFormat.parse(text);
             int id = Integer.parseInt((String) values[1]);
@@ -194,17 +225,32 @@ public class ProductManager {
             Rating rating = Rateable.convert(Integer.parseInt((String) values[4]));
             switch ((String) values[0]) {
                 case "D":
-                    createProduct(id, name, price, rating);
+                    product = new Drink(id, name, price, rating);
                     break;
                 case "F":
                     LocalDate bestBefore = LocalDate.parse((String) values[5]);
-                    createProduct(id, name, price, rating, bestBefore);
+                    product = new Food(id, name, price, rating, bestBefore);
                     break;
             }
         } catch (ParseException | NumberFormatException | DateTimeException e) {
             LOGGER.log(Level.WARNING, "Error parsing product " + text + " " + e.getMessage());
         }
+        return product;
     }
+
+    private void loadAllData() {
+        try {
+            products = Files.list(dataFolder)
+                    .filter(file -> file.getFileName().toString().startsWith("product"))
+                    .map(this::loadProduct)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toMap(product -> product, this::loadReviews));
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Error loading data " + e.getMessage(), e);
+        }
+    }
+
+//===============================================================================================================
 
     private static class ResourceFormatter {
         private final Locale locale;
