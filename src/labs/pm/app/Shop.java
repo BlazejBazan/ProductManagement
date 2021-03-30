@@ -28,7 +28,8 @@ public class Shop {
      */
     public static void main(String[] args) {
         //TODO Application logic
-        ProductManager pm = new ProductManager("en-GB");
+        ProductManager pm = ProductManager.getInstance();
+        pm.printProductReport(1, "en-GB");
 
 /*
         pm.createProduct(1, "Tea", BigDecimal.valueOf(1.99), Rating.NOT_RATED);

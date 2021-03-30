@@ -39,31 +39,27 @@ public class ProductManager {
                     "zh-CN", new ResourceFormatter(Locale.CHINA),
                     "pl-PL", new ResourceFormatter(new Locale("pl", "PL")));
     private Map<Product, List<Review>> products = new HashMap<>();
-    private ResourceFormatter formatter;
-    private final ResourceBundle config = ResourceBundle.getBundle("labs.pm.data.config");
+    private final static ProductManager pm = new ProductManager();
     private final MessageFormat productFormat = new MessageFormat(config.getString("product.data.format"));
     private final MessageFormat reviewFormat = new MessageFormat(config.getString("review.data.format"));
     private final Path reportsFolder = Path.of(config.getString("reports.folder"));
     private final Path tempFolder = Path.of(config.getString("temp.folder"));
     private final Path dataFolder = Path.of(config.getString("data.folder"));
+    //    private ResourceFormatter formatter;
+    private final ResourceBundle config = ResourceBundle.getBundle("labs.pm.data.config");
 
 //=============================================================================================================
 
-    public ProductManager(Locale locale) {
-        this(locale.toLanguageTag());
+    private ProductManager() {
+        loadAllData();
     }
 
-    public ProductManager(String languageTag) {
-        changeLocale(languageTag);
-        loadAllData();
+    public static ProductManager getInstance() {
+        return pm;
     }
 
     public static Set<String> getSupportedLocales() {
         return formatters.keySet();
-    }
-
-    public void changeLocale(String languageTag) {
-        formatter = formatters.getOrDefault(languageTag, formatters.get("en-GB"));
     }
 
     public Product findProduct(int id) throws ProductManagerException {
@@ -73,9 +69,9 @@ public class ProductManager {
                 .orElseThrow(() -> new ProductManagerException("Product " + id + " not found"));
     }
 
-    public void printProductReport(int id) {
+    public void printProductReport(int id, String languageTag) {
         try {
-            printProductReport(findProduct(id));
+            printProductReport(findProduct(id), languageTag);
         } catch (ProductManagerException e) {
             LOGGER.log(Level.INFO, e.getMessage());
         } catch (IOException e) {
@@ -83,7 +79,8 @@ public class ProductManager {
         }
     }
 
-    public void printProductReport(Product product) throws IOException {
+    public void printProductReport(Product product, String languageTag) throws IOException {
+        ResourceFormatter formatter = formatters.getOrDefault(languageTag, formatters.get("en-GB"));
         List<Review> reviews = products.get(product);
         Path productFile = reportsFolder.resolve(MessageFormat.format(
                 config.getString("report.file"), product.getId()));
@@ -104,7 +101,8 @@ public class ProductManager {
         }
     }
 
-    public void printProducts(Predicate<Product> filter, Comparator<Product> sorter) {
+    public void printProducts(Predicate<Product> filter, Comparator<Product> sorter, String languageTag) {
+        ResourceFormatter formatter = formatters.getOrDefault(languageTag, formatters.get("en-GB"));
         StringBuilder txt = new StringBuilder();
         products.keySet()
                 .stream()
@@ -189,7 +187,8 @@ public class ProductManager {
         return reviews;
     }
 
-    public Map<String, String> getDiscounts() {
+    public Map<String, String> getDiscounts(String languageTag) {
+        ResourceFormatter formatter = formatters.getOrDefault(languageTag, formatters.get("en-GB"));
         return products.keySet()
                 .stream()
                 .collect(
@@ -198,7 +197,7 @@ public class ProductManager {
                                 Collectors.collectingAndThen(
                                         Collectors.summingDouble(
                                                 product -> product.getDiscount().doubleValue()),
-                                        discount -> formatter.moneyFormat.format(discount))
+                                        formatter.moneyFormat::format)
                         )
                 );
     }
